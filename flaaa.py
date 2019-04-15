@@ -40,10 +40,10 @@ def index():
     return json.dumps(data_dic)
     
 
-@app.route('/hd')
-def get_data():
-    data = predict.health_data
-    return json.dumps(data)
+@app.route('/predict_hd', methods=['POST'])
+def get_result():
+    data = request.get_json()
+    return predict.classify(data, k=30)
 
 
 if __name__ == '__main__':
