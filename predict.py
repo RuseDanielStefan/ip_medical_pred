@@ -6,26 +6,16 @@ import matplotlib.pyplot as plt
 
 print("predict imported")
 
-
 min_feature = dict()
 max_feature = dict()
-to_predict = {  
-    'age': 0.7083333333333334,
-    'sex': 1.0, 
-    'cp': 1.0,
-    'trestbps': 0.4811320754716981,
-    'chol': 0.24429223744292236,
-    'fbs': 1.0, 'restecg': 0.0,
-    'thalach': 0.6030534351145038,
-    'exang': 0.0,
-    'oldpeak': 0.3709677419354838,
-    'slope': 0.0, 'ca': 0.0,
-    'thal': 0.3333333333333333,
-}
+to_predict = dict()
 health_data = list()
 
 
 def normalize_feature(feature):
+    global min_feature
+    global max_feature
+    global health_data
     x_min = min([person[feature] for person in health_data])
     x_max = max([person[feature] for person in health_data])
     min_feature[feature] = x_min
@@ -71,21 +61,23 @@ def euclidean_dist(item):
     return math.sqrt(sum_all)
 
 
-def knn_class(to_predict, k=8):
+def knn_class(k=8, test = 0):
     yes_votes = sum([ point['target'] for point in health_data[:k] ])
-    return yes_votes/k
+    if test==1:
+        if yes_votes >= (k//2): return 1
+        else: return 0
+    else:
+        return yes_votes/k
     
-
 read_n_normalize('heart.csv')
-
 #dupa numeroase teste am stabilit valoarea lui k = 8
 def classify(predict_dict, k = 8):
-    print(len(health_data))
+    global health_data
     global to_predict
     to_predict = normalize_input(predict_dict)
     print(to_predict)
     health_data.sort(key=euclidean_dist)
-    result = knn_class(to_predict, k)
+    result = knn_class(k)
     print(result)
     return json.dumps({'result' : result})
 
@@ -94,19 +86,19 @@ def classify(predict_dict, k = 8):
 
 if __name__ == "__main__":
     read_n_normalize('heart.csv')
-    print(health_data[:5])
     random.shuffle(health_data)
-    bariera = (len(health_data)*4)//5
-    test_data = list(health_data[ bariera:])
+    bariera = (len(health_data)*2)//3
+    test_data = list(health_data[bariera:])
     health_data = list(health_data[:bariera])
     print(len(test_data) + len(health_data))
+    
     results = list()
     for k in range(1, 31):
         corect = 0
         for person in test_data:
             to_predict = person
             health_data.sort(key=euclidean_dist)
-            result = knn_class(to_predict, k)
+            result = knn_class(k, test = 1)
             if result == person['target']: corect += 1
         results.append(corect/len(test_data))
         print("k=", k, ' accuracy = ', corect/len(test_data))
