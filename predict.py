@@ -69,7 +69,7 @@ def knn_class(k=8, test = 0):
     else:
         return yes_votes/k
     
-read_n_normalize('heart.csv')
+#read_n_normalize('heart.csv')
 #dupa numeroase teste am stabilit valoarea lui k = 8
 def classify(predict_dict, k = 8):
     global health_data
@@ -83,17 +83,17 @@ def classify(predict_dict, k = 8):
 
 
 
-
-if __name__ == "__main__":
+def acc_test():
+    global health_data
+    global to_predict
     read_n_normalize('heart.csv')
     random.shuffle(health_data)
-    bariera = (len(health_data)*2)//3
+    bariera = (len(health_data)*4)//5
     test_data = list(health_data[bariera:])
     health_data = list(health_data[:bariera])
     print(len(test_data) + len(health_data))
-    
     results = list()
-    for k in range(1, 31):
+    for k in range(2, 32):
         corect = 0
         for person in test_data:
             to_predict = person
@@ -102,10 +102,13 @@ if __name__ == "__main__":
             if result == person['target']: corect += 1
         results.append(corect/len(test_data))
         print("k=", k, ' accuracy = ', corect/len(test_data))
-    plt.plot([x for x in range(1, 31)], results)
+    plt.plot([x for x in range(2, 32)], results)
     plt.axis([0, 31, 0.5, 1])
     plt.show()
+    return results
 
+if __name__ == "__main__":
+    acc_test()
 
 
 
