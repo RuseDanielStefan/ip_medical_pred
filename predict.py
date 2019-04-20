@@ -69,7 +69,7 @@ def knn_class(k=8, test = 0):
     else:
         return yes_votes/k
     
-#read_n_normalize('heart.csv')
+read_n_normalize('heart.csv')
 #dupa numeroase teste am stabilit valoarea lui k = 8
 def classify(predict_dict, k = 8):
     global health_data
