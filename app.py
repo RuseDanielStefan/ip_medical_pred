@@ -47,7 +47,7 @@ def get_result():
 
 
 @app.route('/hello')
-def hello():
+def salut():
     return 'hello from hello'
 
 
