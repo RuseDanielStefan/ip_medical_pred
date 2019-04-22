@@ -94,7 +94,7 @@ def acc_test():
     bariera = (len(health_data) * 4) // 5
     test_data = list(health_data[bariera:])
     health_data = list(health_data[:bariera])
-    print(len(test_data) + len(health_data))
+
     results = list()
     for k in range(2, 32):
         corect = 0
@@ -109,6 +109,7 @@ def acc_test():
     plt.plot([x for x in range(2, 32)], results)
     plt.axis([0, 31, 0.5, 1])
     plt.show()
+    # print(health_data)
     return results
 
 
