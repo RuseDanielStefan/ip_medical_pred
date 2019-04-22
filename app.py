@@ -13,6 +13,7 @@ app = Flask(__name__)
 def hello():
     return 'Hello from flask'
 
+
 id = 2
 
 
@@ -20,9 +21,10 @@ id = 2
 def index():
     data_dic = json.loads(request.data, encoding='UTF-8')
     cnx = mysql.connector.connect(
-        user='b380f338c76a8d', password='8768bb5c', host='eu-cdbr-west-02.cleardb.net', database='heroku_c4a6a99da4e3951')
+        user='b380f338c76a8d', password='8768bb5c',
+        host='eu-cdbr-west-02.cleardb.net', database='heroku_c4a6a99da4e3951')
     global id
-    id += 1 
+    id += 1
     patient_id = 1
     cursor = cnx.cursor()
     calories = 1000
@@ -58,32 +60,35 @@ def get_result():
 def get_pac_by_age():
     max_pulse = request.args.get('max_pulse')
     min_pulse = request.args.get('min_pulse')
-    if min_pulse is None: min_pulse = 0
-    if max_pulse is None: max_pulse = 200
+    if min_pulse is None:
+        min_pulse = 0
+    if max_pulse is None:
+        max_pulse = 200
     cnx = mysql.connector.connect(
-        user='b380f338c76a8d', password='8768bb5c', host='eu-cdbr-west-02.cleardb.net', database='heroku_c4a6a99da4e3951')
-    
+        user='b380f338c76a8d', password='8768bb5c',
+        host='eu-cdbr-west-02.cleardb.net', database='heroku_c4a6a99da4e3951')
+
     cursor = cnx.cursor()
-    
+
     sql = "SELECT patient_id from daily_data where pulse > %s and pulse < %s"
     cursor.execute(sql, (min_pulse, max_pulse))
 
-    result = cursor.fetchall() 
+    result = cursor.fetchall()
     res = [line[0] for line in result]
     res = list(set(res))
-
 
     return json.dumps(res)
 
 
-@app.route('/get_day', methods = ['GET'])
+@app.route('/get_day', methods=['GET'])
 def get_day():
     today = request.args.get('day')
     day, month, year = today.split('-')
     day, month, year = int(day), int(month), int(year)
     today = date(year, month, day)
     cnx = mysql.connector.connect(
-        user='b380f338c76a8d', password='8768bb5c', host='eu-cdbr-west-02.cleardb.net', database='heroku_c4a6a99da4e3951')
+        user='b380f338c76a8d', password='8768bb5c',
+        host='eu-cdbr-west-02.cleardb.net', database='heroku_c4a6a99da4e3951')
     cursor = cnx.cursor(dictionary=True)
     sql = "SELECT * from daily_data where day = %s"
     query_day = (today, )
@@ -92,6 +97,66 @@ def get_day():
     for element in res:
         element['day'] = element['day'].strftime("%d-%m-%Y")
     return json.dumps(res)
+
+
+@app.route('/get_calories', methods=['GET'])
+def calories():
+    cnx = mysql.connector.connect(
+        user='b380f338c76a8d', password='8768bb5c',
+        host='eu-cdbr-west-02.cleardb.net', database='heroku_c4a6a99da4e3951')
+    cursor = cnx.cursor(dictionary=True)
+    up = request.args.get('up', default=3000, type=int)
+    down = request.args.get('down', default=1000, type=int)
+    sql = ("SELECT patient_id from daily_data where calories < %s \
+            and calories > %s")
+    data = (up, down,)
+
+    cursor.execute(sql, data)
+
+    data_dic = cursor.fetchall()
+    data_dic = list({v['patient_id']: v for v in data_dic}.values())
+
+    return json.dumps(data_dic)
+
+
+@app.route('/get_water', methods=['GET'])
+def water():
+    cnx = mysql.connector.connect(
+        user='b380f338c76a8d', password='8768bb5c',
+        host='eu-cdbr-west-02.cleardb.net', database='heroku_c4a6a99da4e3951')
+    cursor = cnx.cursor(dictionary=True)
+    up = request.args.get('up', default=10, type=int)
+    down = request.args.get('down', default=1, type=int)
+    sql = ("SELECT patient_id from daily_data where water < %s \
+            and water > %s")
+    data = (up, down,)
+
+    cursor.execute(sql, data)
+
+    data_dic = cursor.fetchall()
+    data_dic = list({v['patient_id']: v for v in data_dic}.values())
+
+    return json.dumps(data_dic)
+
+
+@app.route('/get_weight', methods=['GET'])
+def weight():
+    cnx = mysql.connector.connect(
+        user='b380f338c76a8d', password='8768bb5c',
+        host='eu-cdbr-west-02.cleardb.net', database='heroku_c4a6a99da4e3951')
+    cursor = cnx.cursor(dictionary=True)
+    up = request.args.get('up', default=200, type=int)
+    down = request.args.get('down', default=1, type=int)
+    sql = ("SELECT patient_id from daily_data where weight < %s \
+            and weight > %s")
+    data = (up, down,)
+
+    cursor.execute(sql, data)
+
+    data_dic = cursor.fetchall()
+    data_dic = list({v['patient_id']: v for v in data_dic}.values())
+
+    return json.dumps(data_dic)
 
 
 if __name__ == '__main__':
