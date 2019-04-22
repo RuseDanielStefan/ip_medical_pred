@@ -54,10 +54,45 @@ def get_result():
     return predict.classify(data, k=30)
 
 
-@app.route('/hello')
-def salut():
-    return 'hello from hello'
+@app.route('/get_pulse', methods=['GET'])
+def get_pac_by_age():
+    max_pulse = request.args.get('max_pulse')
+    min_pulse = request.args.get('min_pulse')
+    if min_pulse is None: min_pulse = 0
+    if max_pulse is None: max_pulse = 200
+    cnx = mysql.connector.connect(
+        user='b380f338c76a8d', password='8768bb5c', host='eu-cdbr-west-02.cleardb.net', database='heroku_c4a6a99da4e3951')
+    
+    cursor = cnx.cursor()
+    
+    sql = "SELECT patient_id from daily_data where pulse > %s and pulse < %s"
+    cursor.execute(sql, (min_pulse, max_pulse))
+
+    result = cursor.fetchall() 
+    res = [line[0] for line in result]
+    res = list(set(res))
+
+
+    return json.dumps(res)
+
+
+@app.route('/get_day', methods = ['GET'])
+def get_day():
+    today = request.args.get('day')
+    day, month, year = today.split('-')
+    day, month, year = int(day), int(month), int(year)
+    today = date(year, month, day)
+    cnx = mysql.connector.connect(
+        user='b380f338c76a8d', password='8768bb5c', host='eu-cdbr-west-02.cleardb.net', database='heroku_c4a6a99da4e3951')
+    cursor = cnx.cursor(dictionary=True)
+    sql = "SELECT * from daily_data where day = %s"
+    query_day = (today, )
+    cursor.execute(sql, query_day)
+    res = cursor.fetchall()
+    for element in res:
+        element['day'] = element['day'].strftime("%d-%m-%Y")
+    return json.dumps(res)
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
